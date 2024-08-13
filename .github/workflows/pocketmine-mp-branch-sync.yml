@@ -1,0 +1,48 @@
+name: Sync PocketMine-MP primary branches
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to update'
+        required: true
+        type: choice
+        options:
+          - minor-next
+          - major-next
+
+jobs:
+  merge:
+    name: Sync branch "${{ github.event.inputs.branch }}"
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ github.repository_owner }}/PocketMine-MP # to allow testing on forks without editing the workflow
+        ref: ${{ github.event.inputs.branch }}
+        fetch-depth: 0
+        ssh-key: ${{ secrets.POCKETMINE_MP_DEPLOY_KEY }}
+
+    - name: Set Git config
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+
+    - name: Merge lower branch into target branch
+      run: |
+        LOWER_BRANCH=""
+        if [ "${{ github.event.inputs.branch }}" == "minor-next" ]; then
+          LOWER_BRANCH="stable"
+        elif [ "${{ github.event.inputs.branch }}" == "major-next" ]; then
+          LOWER_BRANCH="minor-next"
+        else
+          echo "::error::Invalid branch"
+          exit 1
+        fi
+        echo "Merging $LOWER_BRANCH" into ${{ github.event.inputs.branch }}"
+        git pull --ff origin "$LOWER_BRANCH" || (echo "::error::Merge conflict or error detected" && exit 1)
+
+    - name: Push changes
+      run: git push origin ${{ github.event.inputs.branch }}
