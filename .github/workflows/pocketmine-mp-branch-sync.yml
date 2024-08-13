@@ -10,10 +10,11 @@ on:
         options:
           - minor-next
           - major-next
+          - "*"
 
 jobs:
   merge:
-    name: Sync branch "${{ github.event.inputs.branch }}"
+    name: Sync branches
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +22,6 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: ${{ github.repository_owner }}/PocketMine-MP # to allow testing on forks without editing the workflow
-        ref: ${{ github.event.inputs.branch }}
         fetch-depth: 0
         ssh-key: ${{ secrets.POCKETMINE_MP_DEPLOY_KEY }}
 
@@ -30,19 +30,17 @@ jobs:
         git config user.name github-actions
         git config user.email github-actions@github.com
 
-    - name: Merge lower branch into target branch
+    - name: Merge "stable" into "minor-next"
+      if: contains(fromJSON('["minor-next", "*"]'), github.event.inputs.branch)
       run: |
-        LOWER_BRANCH=""
-        if [ "${{ github.event.inputs.branch }}" == "minor-next" ]; then
-          LOWER_BRANCH="stable"
-        elif [ "${{ github.event.inputs.branch }}" == "major-next" ]; then
-          LOWER_BRANCH="minor-next"
-        else
-          echo "::error::Invalid branch"
-          exit 1
-        fi
-        echo "Merging $LOWER_BRANCH into ${{ github.event.inputs.branch }}"
-        git pull --ff origin "$LOWER_BRANCH" || (echo "::error::Merge conflict or error detected" && exit 1)
+        git checkout -f minor-next
+        git pull --ff origin stable
+
+    - name: Merge "minor-next" into "major-next"
+      if: contains(fromJSON('["major-next", "*"]'), github.event.inputs.branch)
+      run: |
+        git checkout -f major-next
+        git pull --ff origin minor-next
 
     - name: Push changes
-      run: git push origin ${{ github.event.inputs.branch }}
+      run: git push origin minor-next major-next
