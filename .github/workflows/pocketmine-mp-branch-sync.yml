@@ -30,17 +30,16 @@ jobs:
         git config user.name github-actions
         git config user.email github-actions@github.com
 
-    - name: Merge "stable" into "minor-next"
+    - name: Merge "stable" into "minor-next" and push changes
       if: contains(fromJSON('["minor-next", "*"]'), github.event.inputs.branch)
       run: |
         git checkout -f minor-next
         git pull --ff origin stable
+        git push
 
-    - name: Merge "minor-next" into "major-next"
+    - name: Merge "minor-next" into "major-next" and push changes
       if: contains(fromJSON('["major-next", "*"]'), github.event.inputs.branch)
       run: |
         git checkout -f major-next
         git pull --ff origin minor-next
-
-    - name: Push changes
-      run: git push origin minor-next major-next
+        git push
