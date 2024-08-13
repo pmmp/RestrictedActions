@@ -41,7 +41,7 @@ jobs:
           echo "::error::Invalid branch"
           exit 1
         fi
-        echo "Merging $LOWER_BRANCH" into ${{ github.event.inputs.branch }}"
+        echo "Merging $LOWER_BRANCH into ${{ github.event.inputs.branch }}"
         git pull --ff origin "$LOWER_BRANCH" || (echo "::error::Merge conflict or error detected" && exit 1)
 
     - name: Push changes
