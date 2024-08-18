@@ -8,9 +8,9 @@ on:
         required: true
         type: choice
         options:
+          - "*"
           - minor-next
           - major-next
-          - "*"
 
 jobs:
   merge:
