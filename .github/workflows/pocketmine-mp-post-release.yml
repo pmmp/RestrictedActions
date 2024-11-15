@@ -13,15 +13,23 @@ jobs:
       - name: Checkout RestrictedActions
         uses: actions/checkout@v4
 
+      - name: Generate access token
+        id: token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.RESTRICTED_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RESTRICTED_ACTIONS_APP_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: PocketMine-MP
+
       - name: Checkout PocketMine-MP
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository_owner }}/PocketMine-MP # to allow testing on forks without editing the workflow
           fetch-depth: 0
-          ssh-key: ${{ secrets.POCKETMINE_MP_DEPLOY_KEY }}
+          token: ${{ steps.token.outputs.token }}
           ref: ${{ github.event.client_payload.branch }}
           path: ${{ github.workspace }}/pocketmine-mp
-
 
       - name: Set Git config
         working-directory: ${{ github.workspace }}/pocketmine-mp
