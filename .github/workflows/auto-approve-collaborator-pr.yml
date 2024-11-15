@@ -1,0 +1,80 @@
+name: Auto approve collaborator PRs
+
+on:
+  repository_dispatch:
+    types: auto_approve_collaborator_pr
+
+jobs:
+  approve:
+    name: Approve PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get target repo info
+        uses: actions/github-script@v7
+        id: repo-info
+        with:
+          script: |
+            const [owner, repo] = context.payload.client_payload.repo.split('/');
+            core.setOutput('owner', owner);
+            core.setOutput('repo', repo);
+
+      - name: Generate access token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.POCKETMINE_MP_ACCESS_ID }}
+          private-key: ${{ secrets.POCKETMINE_MP_ACCESS_KEY }}
+          owner: ${{ steps.repo-info.outputs.owner }}
+          repositories: ${{ steps.repo-info.outputs.repo }}
+
+      - name: Get PR author
+        uses: actions/github-script@v7
+        id: pr-info
+        with:
+          github-token: ${{ steps.generate-token.outputs.token }}
+          script: |
+            const [owner, repo] = context.payload.client_payload.repo.split('/');
+            console.log('Owner: ' + owner + ' / Repo: ' + repo + ' / Pull request ID: ' + context.payload.client_payload.pull_request_id);
+            const pr_info = await github.rest.pulls.get({
+              owner: owner,
+              repo: repo,
+              pull_number: context.payload.client_payload.pull_request_id,
+            });
+            console.log(pr_info.data.user.login);
+            console.log(pr_info.data.user.type);
+            core.setOutput('author', pr_info.data.user.login);
+            core.setOutput('bot', pr_info.data.user.type != 'User');
+
+      - name: Get access level of user to repository
+        uses: actions/github-script@v7
+        id: check-access
+        env:
+          PR_AUTHOR: ${{ steps.pr-info.outputs.author }}
+        with:
+          github-token: ${{ steps.generate-token.outputs.token }}
+          result-encoding: string
+          script: |
+            console.log(process.env.PR_AUTHOR);
+            const [owner, repo] = context.payload.client_payload.repo.split('/');
+            const perm_info = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner: owner,
+              repo: repo,
+              username: process.env.PR_AUTHOR,
+            });
+            console.log(perm_info);
+            return perm_info.data.permission == 'admin' || perm_info.data.permission == 'write';
+
+      - name: Approve PR
+        if: ${{ steps.pr-info.outputs.bot == 'false' && steps.check-access.outputs.result == 'true' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ steps.generate-token.outputs.token }}
+          script: |
+            const [owner, repo] = context.payload.client_payload.repo.split('/');
+            await github.rest.pulls.createReview({
+              owner: owner,
+              repo: repo,
+              pull_number: context.payload.client_payload.pull_request_id,
+              event: 'APPROVE',
+            });
