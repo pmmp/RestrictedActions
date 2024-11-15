@@ -23,8 +23,8 @@ jobs:
         id: generate-token
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ vars.POCKETMINE_MP_ACCESS_ID }}
-          private-key: ${{ secrets.POCKETMINE_MP_ACCESS_KEY }}
+          app-id: ${{ vars.RESTRICTED_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.RESTRICTED_ACTIONS_APP_KEY }}
           owner: ${{ steps.repo-info.outputs.owner }}
           repositories: ${{ steps.repo-info.outputs.repo }}
 
