@@ -5,12 +5,9 @@ on:
     types: auto_approve_collaborator_pr
 
 jobs:
-  check:
-    name: Check if PR is from a team member
+  approve:
+    name: Check validity & approve PR
     runs-on: ubuntu-latest
-
-    outputs:
-      approve: ${{ steps.pr-info.outputs.bot == 'false' && steps.check-access.outputs.result == 'true' }}
 
     steps:
       - name: Get target repo info
@@ -68,15 +65,9 @@ jobs:
             console.log(perm_info);
             return perm_info.data.permission == 'admin' || perm_info.data.permission == 'write';
 
-  approve:
-    name: Approve PR
-    runs-on: ubuntu-latest
-    needs: [check]
-    if: needs.check.outputs.approve == 'true'
-
-    steps:
       - name: Approve PR
         uses: actions/github-script@v7
+        if: ${{ steps.pr-info.outputs.bot == 'false' && steps.check-access.outputs.result == 'true' }}
         with:
           github-token: ${{ steps.generate-token.outputs.token }}
           script: |
