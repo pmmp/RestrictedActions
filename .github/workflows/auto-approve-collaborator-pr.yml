@@ -71,7 +71,8 @@ jobs:
   approve:
     name: Approve PR
     runs-on: ubuntu-latest
-    if: jobs.check.outputs.approve == 'true'
+    needs: [check]
+    if: needs.check.outputs.approve == 'true'
 
     steps:
       - name: Approve PR
