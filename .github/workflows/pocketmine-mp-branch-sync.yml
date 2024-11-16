@@ -24,7 +24,7 @@ jobs:
       id: choice
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          echo "branch=${{ github.event.inputs.branch" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
         elif [[ "${{ github.event_name }}" == "schedule" ]]; then
           echo "branch=*" >> $GITHUB_OUTPUT
         else
