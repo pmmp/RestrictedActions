@@ -31,11 +31,17 @@ jobs:
           ref: ${{ github.event.client_payload.branch }}
           path: ${{ github.workspace }}/pocketmine-mp
 
+      - name: Get GitHub App User ID
+        id: get-user-id
+        run: echo "user-id=$(gh api "/users/${{ steps.token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+  
       - name: Set Git config
         working-directory: ${{ github.workspace }}/pocketmine-mp
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config user.name '${{ steps.token.outputs.app-slug }}[bot]'
+          git config user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.token.outputs.app-slug }}[bot]@users.noreply.github.com'
 
       - name: Run version bump script
         working-directory: ${{ github.workspace }}/pocketmine-mp
