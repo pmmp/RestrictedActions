@@ -11,6 +11,8 @@ on:
           - "*"
           - minor-next
           - major-next
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
   merge:
@@ -18,6 +20,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Get sync option
+      id: choice
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          echo "branch=${{ github.event.inputs.branch" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.event_name }}" == "schedule" ]]; then
+          echo "branch=*" >> $GITHUB_OUTPUT
+        else
+          echo "::error Unexpected event type ${{ github.event_name }}"
+          exit 1
+        fi
+
     - name: Generate access token
       id: token
       uses: actions/create-github-app-token@v1
@@ -40,7 +54,7 @@ jobs:
         git config user.email github-actions@github.com
 
     - name: Merge "stable" into "minor-next" and push changes
-      if: contains(fromJSON('["minor-next", "*"]'), github.event.inputs.branch)
+      if: contains(fromJSON('["minor-next", "*"]'), steps.choice.outputs.branch)
       run: |
         LOWER_BRANCH="stable"
         TARGET_BRANCH="minor-next"
@@ -53,7 +67,7 @@ jobs:
         git push
 
     - name: Merge "minor-next" into "major-next" and push changes
-      if: contains(fromJSON('["major-next", "*"]'), github.event.inputs.branch)
+      if: contains(fromJSON('["major-next", "*"]'), steps.choice.outputs.branch)
       run: |
         LOWER_BRANCH="minor-next"
         TARGET_BRANCH="major-next"
