@@ -48,7 +48,7 @@ jobs:
                 username: process.env.APP_SLUG + '[bot]'
               });
               const bot_user_id = user_info.data.id;
-              if (bot_user_id != reviewer_id) {
+              if (bot_user_id !== reviewer_id) {
                 console.log(`Not the bot's review that was dismissed (expected user ID: ${bot_user_id}, got: ${reviewer_id})`);
                 console.log('Skipping re-review');
                 core.setOutput('skip', 'true');
@@ -75,7 +75,7 @@ jobs:
             console.log(pr_info.data.user.login);
             console.log(pr_info.data.user.type);
             core.setOutput('author', pr_info.data.user.login);
-            core.setOutput('bot', pr_info.data.user.type != 'User');
+            core.setOutput('bot', pr_info.data.user.type !== 'User');
 
       - name: Get access level of user to repository
         if: ${{ steps.re-review.outputs.skip != 'true' }}
@@ -95,7 +95,7 @@ jobs:
               username: process.env.PR_AUTHOR,
             });
             console.log(perm_info);
-            return perm_info.data.permission == 'admin' || perm_info.data.permission == 'write';
+            return perm_info.data.permission === 'admin' || perm_info.data.permission === 'write';
 
       - name: Approve PR
         uses: actions/github-script@v7
