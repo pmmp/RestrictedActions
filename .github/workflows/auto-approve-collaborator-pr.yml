@@ -28,7 +28,38 @@ jobs:
           owner: ${{ steps.repo-info.outputs.owner }}
           repositories: ${{ steps.repo-info.outputs.repo }}
 
+      - name: "Check if bot's review was dismissed (pull_request_review.dismissed only)"
+        id: re-review
+        uses: actions/github-script@v7
+        env:
+          APP_SLUG: ${{ steps.generate-token.outputs.app-slug }}
+          REVIEWER_ID: ${{ github.event.client_payload.reviewer_id }}
+        with:
+          github-token: ${{ steps.generate-token.outputs.token }}
+          script: |
+            const reviewer_id = process.env.REVIEWER_ID;
+            console.log(reviewer_id);
+            if (reviewer_id === "0") {
+              console.log("No reviewer ID provided, continuing with re-review");
+              core.setOutput('skip', 'false');
+            } else {
+              console.log("Reviewer ID provided: " + reviewer_id);
+              const user_info = await github.rest.users.getByUsername({
+                process.env.APP_SLUG + '[bot]'
+              });
+              const bot_user_id = user_info.data.id;
+              if (bot_user_id != reviewer_id) {
+                console.log(`Not the bot's review that was dismissed (expected user ID: ${bot_user_id}, got: ${reviewer_id})`);
+                console.log('Skipping re-review');
+                core.setOutput('skip', 'true');
+              } else {
+                console.log("Bot's review was dismissed, continuing with re-review");
+                core.setOutput('skip', 'false');
+              }
+            }
+
       - name: Get PR author
+        if: ${{ steps.re-review.outputs.skip != 'true' }}
         uses: actions/github-script@v7
         id: pr-info
         with:
@@ -47,6 +78,7 @@ jobs:
             core.setOutput('bot', pr_info.data.user.type != 'User');
 
       - name: Get access level of user to repository
+        if: ${{ steps.re-review.outputs.skip != 'true' }}
         uses: actions/github-script@v7
         id: check-access
         env:
@@ -67,7 +99,7 @@ jobs:
 
       - name: Approve PR
         uses: actions/github-script@v7
-        if: ${{ steps.pr-info.outputs.bot == 'false' && steps.check-access.outputs.result == 'true' }}
+        if: ${{ steps.re-review.outputs.skip != 'true' && steps.pr-info.outputs.bot == 'false' && steps.check-access.outputs.result == 'true' }}
         with:
           github-token: ${{ steps.generate-token.outputs.token }}
           script: |
