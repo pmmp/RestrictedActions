@@ -45,11 +45,11 @@ jobs:
             } else {
               console.log("Reviewer ID provided: " + reviewer_id);
               const user_info = await github.rest.users.getByUsername({
-                process.env.APP_SLUG + '[bot]'
+                username: process.env.APP_SLUG + '[bot]'
               });
               const bot_user_id = user_info.data.id;
               if (bot_user_id != reviewer_id) {
-                console.log("Not the bot's review that was dismissed (expected user ID: " + bot_user_id + ', got: ' + reviewer_id + ')');
+                console.log(`Not the bot's review that was dismissed (expected user ID: ${bot_user_id}, got: ${reviewer_id})`);
                 console.log('Skipping re-review');
                 core.setOutput('skip', 'true');
               } else {
