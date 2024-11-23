@@ -21,6 +21,7 @@ jobs:
     permissions:
       actions: write
     steps:
+      - uses: actions/checkout@v4
       - uses: gautamkrishnar/keepalive-workflow@v2
 
   merge:
