@@ -49,7 +49,7 @@ jobs:
               });
               const bot_user_id = user_info.data.id;
               if (bot_user_id != reviewer_id) {
-                console.log('Not the bot's review that was dismissed (expected user ID: ' + bot_user_id + ', got: ' + reviewer_id + ')');
+                console.log("Not the bot's review that was dismissed (expected user ID: " + bot_user_id + ', got: ' + reviewer_id + ')');
                 console.log('Skipping re-review');
                 core.setOutput('skip', 'true');
               } else {
