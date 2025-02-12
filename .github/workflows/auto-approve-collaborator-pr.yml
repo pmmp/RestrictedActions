@@ -39,7 +39,7 @@ jobs:
           script: |
             const reviewer_id = process.env.REVIEWER_ID;
             console.log(reviewer_id);
-            if (reviewer_id === "0") {
+            if (reviewer_id === "0" || reviewer_id === "") {
               console.log("No reviewer ID provided, continuing with re-review");
               core.setOutput('skip', 'false');
             } else {
