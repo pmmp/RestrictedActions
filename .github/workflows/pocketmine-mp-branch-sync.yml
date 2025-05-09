@@ -15,15 +15,6 @@ on:
     - cron: "0 0 * * *"
 
 jobs:
-  cron-keepalive:
-    name: Prevent GitHub from disabling cron workflow
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: gautamkrishnar/keepalive-workflow@v2
-
   merge:
     name: Sync branches
     runs-on: ubuntu-latest
