@@ -11,8 +11,8 @@ on:
           - "*"
           - minor-next
           - major-next
-  schedule:
-    - cron: "0 0 * * *"
+  repository_dispatch:
+    types: pocketmine_mp_branch_sync
 
 jobs:
   merge:
@@ -25,7 +25,7 @@ jobs:
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           echo "branch=${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
-        elif [[ "${{ github.event_name }}" == "schedule" ]]; then
+        elif [[ "${{ github.event_name }}" == "repository_dispatch" ]]; then
           echo "branch=*" >> $GITHUB_OUTPUT
         else
           echo "::error Unexpected event type ${{ github.event_name }}"
