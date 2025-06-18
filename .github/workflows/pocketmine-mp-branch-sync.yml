@@ -86,7 +86,7 @@ jobs:
         git push
 
     - name: Notify Discord webhook
-      if: failure() && github.event_name == 'schedule'
+      if: failure() && github.event_name == 'repository_dispatch'
       run: |
         url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         msg="Automatic branch sync failed ([build log]($url)), please merge manually ASAP"
