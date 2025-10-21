@@ -57,11 +57,11 @@ jobs:
           git diff
           git status
 
-      - name: Delete translation files with no translations
+      - name: Delete translation files with no useful translations
         working-directory: resources/translations
         run: |
-          for file in *.ini; do
-            if grep -q -P '^[A-Za-z0-9_\-\.]+=' $file; then
+          for file in resources/translations/*.ini; do
+            if grep -q -P '^(?!language\.name[ ]*=)[A-Za-z0-9_\-\.]+[ ]*=' $file; then
               echo "Not empty: $file"
             else
               echo "Deleting empty file: $file"
