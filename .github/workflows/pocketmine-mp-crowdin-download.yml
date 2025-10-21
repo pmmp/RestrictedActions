@@ -60,7 +60,7 @@ jobs:
       - name: Delete translation files with no useful translations
         working-directory: resources/translations
         run: |
-          for file in resources/translations/*.ini; do
+          for file in *.ini; do
             if grep -q -P '^(?!language\.name[ ]*=)[A-Za-z0-9_\-\.]+[ ]*=' $file; then
               echo "Not empty: $file"
             else
