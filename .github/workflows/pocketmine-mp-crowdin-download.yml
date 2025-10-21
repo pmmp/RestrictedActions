@@ -76,5 +76,6 @@ jobs:
           commit-message: 'New translations from Crowdin (${{ matrix.branch }})'
           branch: crowdin-auto-fetch/${{ matrix.branch }}
           title: 'New translations from Crowdin (${{ matrix.branch }})'
+          body: 'Pull request created by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
           base: ${{ matrix.branch }}
           token: ${{ steps.token.outputs.token }}
