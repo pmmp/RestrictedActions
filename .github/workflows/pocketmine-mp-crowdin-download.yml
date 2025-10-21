@@ -72,7 +72,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
-          add-paths: '*.ini'
+          add-paths: 'resources/translations/*.ini'
           commit-message: 'New translations from Crowdin (${{ matrix.branch }})'
           branch: crowdin-auto-fetch/${{ matrix.branch }}
           title: 'New translations from Crowdin (${{ matrix.branch }})'
