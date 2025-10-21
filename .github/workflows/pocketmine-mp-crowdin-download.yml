@@ -27,7 +27,7 @@ jobs:
           private-key: ${{ secrets.RESTRICTED_ACTIONS_APP_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: PocketMine-MP
-  
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -77,3 +77,4 @@ jobs:
           branch: crowdin-auto-fetch/${{ matrix.branch }}
           title: 'New translations from Crowdin (${{ matrix.branch }})'
           base: ${{ matrix.branch }}
+          token: ${{ steps.token.outputs.token }}
