@@ -70,7 +70,7 @@ jobs:
         echo "${{ github.workspace }}/composer-git-merge-driver/bin" >> $GITHUB_PATH
         echo "composer.lock merge=composer_json" >> ./.git/info/attributes
 
-        echo "[merge \"composer.lock\"] >> ./.git/config
+        echo "[merge \"composer_lock\"] >> ./.git/config
         echo "    name = composer.lock merge driver" >> ./.git/config
         echo "    driver = composer-git-merge-driver %O %A %B %L %P" >> ./.git/config
         echo "    recursive = binary" >> ./.git/config
