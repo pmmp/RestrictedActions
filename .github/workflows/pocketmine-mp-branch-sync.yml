@@ -68,12 +68,11 @@ jobs:
     - name: Setup composer-git-merge-driver
       run: |
         echo "${{ github.workspace }}/composer-git-merge-driver/bin" >> $GITHUB_PATH
-        echo "composer.lock merge=composer_json" >> ./.git/info/attributes
+        echo "composer.lock merge=composer_lock" >> ./.git/info/attributes
 
-        echo "[merge \"composer_lock\"] >> ./.git/config
-        echo "    name = composer.lock merge driver" >> ./.git/config
-        echo "    driver = composer-git-merge-driver %O %A %B %L %P" >> ./.git/config
-        echo "    recursive = binary" >> ./.git/config
+        git config merge.composer_lock.name "composer.lock merge driver"
+        git config merge.composer_lock.driver "composer-git-merge-driver %O %A %B %L %P"
+        git config merge.composer_lock.recursive binary
 
       #needed for composer and merge driver
     - name: Setup PHP
