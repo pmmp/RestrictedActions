@@ -69,6 +69,12 @@ jobs:
             fi
           done
 
+      - name: Get GitHub App User ID
+        id: get-user-id
+        run: echo "user-id=$(gh api "/users/${{ steps.token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         with:
@@ -79,3 +85,4 @@ jobs:
           body: 'Pull request created by: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
           base: ${{ matrix.branch }}
           token: ${{ steps.token.outputs.token }}
+          author: '${{ steps.token.outputs.app-slug }}[bot] <${{ steps.get-user-id.outputs.user-id }}+${{ steps.token.outputs.app-slug }}[bot]@users.noreply.github.com>'
