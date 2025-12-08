@@ -78,7 +78,6 @@ jobs:
             console.log(pr_info.data.user.login);
             console.log(pr_info.data.user.type);
             core.setOutput('author', pr_info.data.user.login);
-            core.setOutput('author-id', pr_info.data.user.id);
             core.setOutput('ignored-bot', pr_info.data.user.type !== 'User' && pr_info.data.user.id !== parseInt(process.env.DEPENDABOT_USER_ID));
 
       - name: Get access level of user to repository
@@ -93,10 +92,6 @@ jobs:
           result-encoding: string
           script: |
             console.log(process.env.PR_AUTHOR);
-            if (process.env.PR_AUTHOR_ID === parseInt(process.env.DEPENDABOT_USER_ID)) {
-              console.log("Dependabot detected - GitHub API lies about its write access, so this is hardcoded");
-              return true;
-            }
             const [owner, repo] = context.payload.client_payload.repo.split('/');
             const perm_info = await github.rest.repos.getCollaboratorPermissionLevel({
               owner: owner,
@@ -104,7 +99,8 @@ jobs:
               username: process.env.PR_AUTHOR,
             });
             console.log(perm_info);
-            return perm_info.data.permission === 'admin' || perm_info.data.permission === 'write';
+            //github API lies about dependabot's permissions, so this user ID check is hardcoded
+            return perm_info.data.permission === 'admin' || perm_info.data.permission === 'write' || perm_info.data.user.id === parseInt(process.env.DEPENDABOT_USER_ID);
 
       - name: Approve PR
         uses: actions/github-script@v7
