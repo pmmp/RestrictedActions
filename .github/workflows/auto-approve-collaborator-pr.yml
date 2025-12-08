@@ -4,6 +4,9 @@ on:
   repository_dispatch:
     types: auto_approve_collaborator_pr
 
+env:
+  DEPENDABOT_USER_ID: 49699333
+
 jobs:
   approve:
     name: Check validity & approve PR
@@ -75,8 +78,8 @@ jobs:
             console.log(pr_info.data.user.login);
             console.log(pr_info.data.user.type);
             core.setOutput('author', pr_info.data.user.login);
-            //id 49699333 is dependabot - all other bots are ignored
-            core.setOutput('ignored-bot', pr_info.data.user.type !== 'User' && pr_info.data.user.id != 49699333);
+            core.setOutput('author-id', pr_info.data.user.id);
+            core.setOutput('ignored-bot', pr_info.data.user.type !== 'User' && pr_info.data.user.id !== parseInt(process.env.DEPENDABOT_USER_ID));
 
       - name: Get access level of user to repository
         if: ${{ steps.re-review.outputs.skip != 'true' }}
@@ -84,11 +87,16 @@ jobs:
         id: check-access
         env:
           PR_AUTHOR: ${{ steps.pr-info.outputs.author }}
+          PR_AUTHOR_ID: ${{ steps.pr-info.outputs.author-id }}
         with:
           github-token: ${{ steps.generate-token.outputs.token }}
           result-encoding: string
           script: |
             console.log(process.env.PR_AUTHOR);
+            if (process.env.PR_AUTHOR_ID === parseInt(process.env.DEPENDABOT_USER_ID)) {
+              console.log("Dependabot detected - GitHub API lies about its write access, so this is hardcoded");
+              return true;
+            }
             const [owner, repo] = context.payload.client_payload.repo.split('/');
             const perm_info = await github.rest.repos.getCollaboratorPermissionLevel({
               owner: owner,
