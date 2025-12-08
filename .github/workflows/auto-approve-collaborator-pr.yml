@@ -75,7 +75,8 @@ jobs:
             console.log(pr_info.data.user.login);
             console.log(pr_info.data.user.type);
             core.setOutput('author', pr_info.data.user.login);
-            core.setOutput('bot', pr_info.data.user.type !== 'User');
+            //id 49699333 is dependabot - all other bots are ignored
+            core.setOutput('ignored-bot', pr_info.data.user.type !== 'User' && pr_info.data.user.id != 49699333);
 
       - name: Get access level of user to repository
         if: ${{ steps.re-review.outputs.skip != 'true' }}
@@ -99,7 +100,7 @@ jobs:
 
       - name: Approve PR
         uses: actions/github-script@v7
-        if: ${{ steps.re-review.outputs.skip != 'true' && steps.pr-info.outputs.bot == 'false' && steps.check-access.outputs.result == 'true' }}
+        if: ${{ steps.re-review.outputs.skip != 'true' && steps.pr-info.outputs.ignored-bot == 'true' && steps.check-access.outputs.result == 'true' }}
         with:
           github-token: ${{ steps.generate-token.outputs.token }}
           script: |
